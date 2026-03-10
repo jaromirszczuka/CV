@@ -2,29 +2,72 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Booting...</title>
+<title>Retro CV</title>
 
 <style>
 
 body{
+margin:0;
+background:#111;
+display:flex;
+justify-content:center;
+align-items:center;
+height:100vh;
+font-family:monospace;
+}
+
+#scene{
+position:relative;
+width:900px;
+}
+
+#desk{
+width:100%;
+display:block;
+}
+
+#screen{
+
+position:absolute;
+
+/* dopasuj do miejsca ekranu monitora */
+top:120px;
+left:260px;
+
+width:380px;
+height:260px;
+
 background:black;
 color:#00ff00;
-font-family:monospace;
-font-size:18px;
-padding:20px;
+
+padding:10px;
+overflow:auto;
+
+box-shadow:
+0 0 20px #00ff00 inset,
+0 0 30px #00ff00;
+
 }
 
-#cursor{
-display:inline-block;
-width:10px;
-background:#00ff00;
-animation:blink 1s infinite;
-}
+/* scanlines CRT */
 
-@keyframes blink{
-0%{opacity:0}
-50%{opacity:1}
-100%{opacity:0}
+#screen::after{
+content:"";
+position:absolute;
+top:0;
+left:0;
+width:100%;
+height:100%;
+
+background:
+repeating-linear-gradient(
+to bottom,
+rgba(0,0,0,0) 0px,
+rgba(0,0,0,0) 2px,
+rgba(0,0,0,0.3) 3px
+);
+
+pointer-events:none;
 }
 
 input{
@@ -32,140 +75,71 @@ background:black;
 border:none;
 color:#00ff00;
 font-family:monospace;
-font-size:18px;
 outline:none;
 }
 
 </style>
-
 </head>
 
 <body>
 
-<pre id="screen"></pre>
+<div id="scene">
 
-<div id="terminal" style="display:none;">
+<img id="desk" src="desk.png">
+
+<div id="screen">
+
+<div id="output">
+Phoenix BIOS v4.0<br>
+Booting DomekOS...<br>
+Type /help<br><br>
+</div>
+
 <span>C:\CV></span>
-<input id="command" autofocus>
-<div id="output"></div>
+<input id="cmd">
+
+</div>
+
 </div>
 
 <script>
 
-const screen = document.getElementById("screen");
-
-const bootLines = [
-"Phoenix BIOS v4.0 Release 6.0",
-"Copyright 1985-1999 Phoenix Technologies Ltd.",
-"",
-"CPU: Intel Pentium 200MHz detected",
-"Checking NVRAM...",
-"",
-"Memory Test:",
-];
-
-let ram = 0;
-
-function typeLine(text, callback){
-let i=0;
-let interval = setInterval(()=>{
-screen.textContent += text[i];
-i++;
-if(i >= text.length){
-clearInterval(interval);
-screen.textContent += "\n";
-setTimeout(callback,300);
-}
-},20);
-}
-
-function bootSequence(){
-
-let i=0;
-
-function next(){
-if(i < bootLines.length){
-typeLine(bootLines[i], ()=>{
-i++;
-next();
-});
-}else{
-memoryTest();
-}
-}
-
-next();
-
-}
-
-function memoryTest(){
-
-let interval = setInterval(()=>{
-
-ram += 512;
-
-screen.textContent = screen.textContent.replace(/Memory Test:.*/,"Memory Test: "+ram+"K");
-
-if(ram >= 8192){
-
-clearInterval(interval);
-
-screen.textContent += " OK\n\n";
-screen.textContent += "Booting DomekOS...\n\n";
-screen.textContent += "Type /help\n\n";
-
-setTimeout(()=>{
-document.getElementById("terminal").style.display="block";
-},1000);
-
-}
-
-},100);
-
-}
-
-bootSequence();
-
-const commandInput = document.getElementById("command");
+const input = document.getElementById("cmd");
 const output = document.getElementById("output");
 
-commandInput.addEventListener("keydown", function(e){
+input.addEventListener("keydown",function(e){
 
 if(e.key==="Enter"){
 
-let cmd = commandInput.value.trim();
+let cmd=input.value;
 
-let response="";
+let res="";
 
 switch(cmd){
 
 case "/help":
-response="Commands:\n/wyksztalcenie\n/umiejetnosci\n/projekty\n/kontakt";
-break;
-
-case "/wyksztalcenie":
-response="Technikum Informatyczne\nProfil: IT";
+res="komendy: /umiejetnosci /projekty /kontakt";
 break;
 
 case "/umiejetnosci":
-response="Python\nLinux\nOBS\nHTML\nAutomatyzacja";
+res="Python<br>Linux<br>OBS<br>Automatyzacja";
 break;
 
 case "/projekty":
-response="Bot TikTok Live\nMini gry dla streamów\nAutomatyzacje OBS";
+res="Bot TikTok Live<br>Mini gry streamowe";
 break;
 
 case "/kontakt":
-response="email: twoj@email\nGitHub: github.com/twojprofil";
+res="email: twoj@email";
 break;
 
 default:
-response="Unknown command. type /help";
+res="unknown command";
 }
 
-output.innerHTML += "<pre>"+cmd+"\n"+response+"</pre>";
+output.innerHTML += "C:\\CV>"+cmd+"<br>"+res+"<br><br>";
 
-commandInput.value="";
+input.value="";
 
 }
 
