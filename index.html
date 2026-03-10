@@ -2,7 +2,7 @@
 <html>
 <head>
 <meta charset="UTF-8">
-<title>Retro CV</title>
+<title>DomekOS CV</title>
 
 <style>
 
@@ -30,26 +30,30 @@ display:block;
 
 position:absolute;
 
-/* dopasuj do miejsca ekranu monitora */
-top:120px;
-left:260px;
+top:135px;
+left:270px;
 
-width:380px;
-height:260px;
+width:360px;
+height:240px;
 
 background:black;
-color:#00ff00;
+color:#00ff66;
 
-padding:10px;
+padding:12px;
+
 overflow:auto;
 
 box-shadow:
-0 0 20px #00ff00 inset,
-0 0 30px #00ff00;
+0 0 20px #00ff66 inset,
+0 0 40px #00ff66;
+
+border-radius:20px;
+
+animation:flicker 0.15s infinite;
 
 }
 
-/* scanlines CRT */
+/* scanlines */
 
 #screen::after{
 content:"";
@@ -64,16 +68,22 @@ repeating-linear-gradient(
 to bottom,
 rgba(0,0,0,0) 0px,
 rgba(0,0,0,0) 2px,
-rgba(0,0,0,0.3) 3px
+rgba(0,0,0,0.35) 3px
 );
 
 pointer-events:none;
 }
 
+@keyframes flicker{
+0%{opacity:1}
+50%{opacity:0.97}
+100%{opacity:1}
+}
+
 input{
 background:black;
 border:none;
-color:#00ff00;
+color:#00ff66;
 font-family:monospace;
 outline:none;
 }
@@ -89,14 +99,13 @@ outline:none;
 
 <div id="screen">
 
-<div id="output">
-Phoenix BIOS v4.0<br>
-Booting DomekOS...<br>
-Type /help<br><br>
-</div>
+<pre id="boot"></pre>
 
+<div id="terminal" style="display:none;">
 <span>C:\CV></span>
-<input id="cmd">
+<input id="command" autofocus>
+<div id="output"></div>
+</div>
 
 </div>
 
@@ -104,42 +113,152 @@ Type /help<br><br>
 
 <script>
 
-const input = document.getElementById("cmd");
-const output = document.getElementById("output");
+const boot = document.getElementById("boot");
 
-input.addEventListener("keydown",function(e){
+const bootLines = [
+
+"Phoenix BIOS v4.0 Release 6.0",
+"Copyright 1985-1999 Phoenix Technologies",
+"",
+"CPU: Intel Pentium 200MHz detected",
+"Checking NVRAM...",
+"",
+"Memory Test:"
+
+];
+
+let ram = 0;
+
+function typeLine(text, callback){
+
+let i=0;
+
+let interval=setInterval(()=>{
+
+boot.textContent += text[i];
+
+i++;
+
+if(i>=text.length){
+
+clearInterval(interval);
+
+boot.textContent+="\n";
+
+setTimeout(callback,200);
+
+}
+
+},20);
+
+}
+
+function bootSequence(){
+
+let i=0;
+
+function next(){
+
+if(i<bootLines.length){
+
+typeLine(bootLines[i],()=>{
+
+i++;
+
+next();
+
+});
+
+}else{
+
+memoryTest();
+
+}
+
+}
+
+next();
+
+}
+
+function memoryTest(){
+
+let interval=setInterval(()=>{
+
+ram+=512;
+
+boot.textContent = boot.textContent.replace(/Memory Test:.*/,"Memory Test: "+ram+"K");
+
+if(ram>=8192){
+
+clearInterval(interval);
+
+boot.textContent+=" OK\n\n";
+
+boot.textContent+="Booting DomekOS...\n\n";
+
+boot.textContent+="Type /help\n\n";
+
+setTimeout(()=>{
+
+document.getElementById("terminal").style.display="block";
+
+},1000);
+
+}
+
+},120);
+
+}
+
+bootSequence();
+
+const commandInput=document.getElementById("command");
+
+const output=document.getElementById("output");
+
+commandInput.addEventListener("keydown",function(e){
 
 if(e.key==="Enter"){
 
-let cmd=input.value;
+let cmd=commandInput.value.trim();
 
 let res="";
 
 switch(cmd){
 
 case "/help":
-res="komendy: /umiejetnosci /projekty /kontakt";
+res="Commands:\n/wyksztalcenie\n/umiejetnosci\n/projekty\n/kontakt\n/scan";
+break;
+
+case "/wyksztalcenie":
+res="Technikum Informatyczne\nProfil: Informatyka";
 break;
 
 case "/umiejetnosci":
-res="Python<br>Linux<br>OBS<br>Automatyzacja";
+res="Python\nLinux\nHTML\nOBS\nAutomatyzacja";
 break;
 
 case "/projekty":
-res="Bot TikTok Live<br>Mini gry streamowe";
+res="Bot TikTok Live\nMini gry do streamów\nAutomatyzacja OBS";
 break;
 
 case "/kontakt":
-res="email: twoj@email";
+res="email: twoj@email\nGitHub: github.com/twojprofil";
+break;
+
+case "/scan":
+res="Scanning system...\nSkill detected:\nPython\nLinux\nAutomation\nStreaming Tools";
 break;
 
 default:
-res="unknown command";
+res="Unknown command. type /help";
+
 }
 
-output.innerHTML += "C:\\CV>"+cmd+"<br>"+res+"<br><br>";
+output.innerHTML+="<pre>"+cmd+"\n"+res+"</pre>";
 
-input.value="";
+commandInput.value="";
 
 }
 
