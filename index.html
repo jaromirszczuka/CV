@@ -8,17 +8,25 @@
 
 body{
 margin:0;
-background:#111;
+background:black;
 display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
 font-family:monospace;
+overflow:hidden;
 }
 
 #scene{
 position:relative;
 width:900px;
+transform:scale(0.7);
+animation:zoom 3s forwards;
+}
+
+@keyframes zoom{
+from{transform:scale(0.7)}
+to{transform:scale(1)}
 }
 
 #desk{
@@ -43,13 +51,13 @@ padding:12px;
 
 overflow:auto;
 
+border-radius:25px;
+
 box-shadow:
-0 0 20px #00ff66 inset,
-0 0 40px #00ff66;
+0 0 25px #00ff66 inset,
+0 0 50px #00ff66;
 
-border-radius:20px;
-
-animation:flicker 0.15s infinite;
+animation:flicker 0.12s infinite;
 
 }
 
@@ -74,9 +82,11 @@ rgba(0,0,0,0.35) 3px
 pointer-events:none;
 }
 
+/* CRT flicker */
+
 @keyframes flicker{
 0%{opacity:1}
-50%{opacity:0.97}
+50%{opacity:0.96}
 100%{opacity:1}
 }
 
@@ -86,12 +96,15 @@ border:none;
 color:#00ff66;
 font-family:monospace;
 outline:none;
+width:200px;
 }
 
 </style>
 </head>
 
 <body>
+
+<audio id="bootSound" src="boot.mp3"></audio>
 
 <div id="scene">
 
@@ -113,6 +126,8 @@ outline:none;
 
 <script>
 
+document.getElementById("bootSound").play();
+
 const boot = document.getElementById("boot");
 
 const bootLines = [
@@ -120,6 +135,7 @@ const bootLines = [
 "Phoenix BIOS v4.0 Release 6.0",
 "Copyright 1985-1999 Phoenix Technologies",
 "",
+"Detecting hardware...",
 "CPU: Intel Pentium 200MHz detected",
 "Checking NVRAM...",
 "",
@@ -240,7 +256,7 @@ res="Python\nLinux\nHTML\nOBS\nAutomatyzacja";
 break;
 
 case "/projekty":
-res="Bot TikTok Live\nMini gry do streamów\nAutomatyzacja OBS";
+res="Bot TikTok Live\nMini gry do streamów\nAutomatyzacje OBS";
 break;
 
 case "/kontakt":
@@ -248,7 +264,11 @@ res="email: twoj@email\nGitHub: github.com/twojprofil";
 break;
 
 case "/scan":
-res="Scanning system...\nSkill detected:\nPython\nLinux\nAutomation\nStreaming Tools";
+res="Scanning system...\n\nSkill detected:\nPython\nLinux\nAutomation\nStreaming Tools\nCreative Problem Solving";
+break;
+
+case "/hire":
+res="Candidate status: EXCELLENT\nRecommendation: HIRE IMMEDIATELY";
 break;
 
 default:
