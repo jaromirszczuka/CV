@@ -9,85 +9,86 @@
 body{
 margin:0;
 background:black;
+font-family:monospace;
+overflow:hidden;
+color:#00ff66;
+}
+
+/* SCENY */
+
+.scene{
+position:absolute;
+width:100%;
+height:100%;
 display:flex;
 justify-content:center;
 align-items:center;
-height:100vh;
-font-family:monospace;
-overflow:hidden;
 }
 
-#scene{
-position:relative;
+/* BUDYNEK */
+
+#building img{
+width:120%;
+animation:zoomBuilding 3s forwards;
+}
+
+@keyframes zoomBuilding{
+from{transform:scale(1)}
+to{transform:scale(3)}
+}
+
+/* BIURKO */
+
+#deskScene{
+opacity:0;
+}
+
+#deskScene img{
 width:900px;
-transform:scale(0.7);
-animation:zoom 3s forwards;
+animation:zoomDesk 4s forwards;
 }
 
-@keyframes zoom{
-from{transform:scale(0.7)}
-to{transform:scale(1)}
+@keyframes zoomDesk{
+from{transform:scale(0.8)}
+to{transform:scale(2.5)}
 }
 
-#desk{
-width:100%;
-display:block;
-}
+/* BIOS */
 
-#screen{
-
-position:absolute;
-
-top:135px;
-left:270px;
-
-width:360px;
-height:240px;
-
+#bios{
+opacity:0;
 background:black;
-color:#00ff66;
-
-padding:12px;
-
-overflow:auto;
-
-border-radius:25px;
-
-box-shadow:
-0 0 25px #00ff66 inset,
-0 0 50px #00ff66;
-
-animation:flicker 0.12s infinite;
-
+display:flex;
+justify-content:center;
+align-items:center;
+height:100%;
 }
 
-/* scanlines */
+#terminal{
+width:900px;
+}
 
-#screen::after{
+pre{
+color:#00ff66;
+font-size:20px;
+}
+
+/* CRT effect */
+
+pre::after{
 content:"";
 position:absolute;
 top:0;
 left:0;
 width:100%;
 height:100%;
-
-background:
-repeating-linear-gradient(
+background:repeating-linear-gradient(
 to bottom,
 rgba(0,0,0,0) 0px,
 rgba(0,0,0,0) 2px,
-rgba(0,0,0,0.35) 3px
+rgba(0,0,0,0.3) 3px
 );
-
 pointer-events:none;
-}
-
-/* CRT flicker */
-
-@keyframes flicker{
-0%{opacity:1}
-50%{opacity:0.96}
-100%{opacity:1}
 }
 
 input{
@@ -95,8 +96,8 @@ background:black;
 border:none;
 color:#00ff66;
 font-family:monospace;
+font-size:18px;
 outline:none;
-width:200px;
 }
 
 </style>
@@ -106,18 +107,37 @@ width:200px;
 
 <audio id="bootSound" src="boot.mp3"></audio>
 
-<div id="scene">
+<!-- SCENA 1 BUDYNEK -->
 
-<img id="desk" src="desk.png">
+<div id="building" class="scene">
 
-<div id="screen">
+<img src="budynek.png">
+
+</div>
+
+<!-- SCENA 2 BIURKO -->
+
+<div id="deskScene" class="scene">
+
+<img src="desk.png">
+
+</div>
+
+<!-- SCENA 3 BIOS -->
+
+<div id="bios">
+
+<div id="terminal">
 
 <pre id="boot"></pre>
 
-<div id="terminal" style="display:none;">
+<div id="cmd" style="display:none">
+
 <span>C:\CV></span>
-<input id="command" autofocus>
+<input id="command">
+
 <div id="output"></div>
+
 </div>
 
 </div>
@@ -126,52 +146,65 @@ width:200px;
 
 <script>
 
-document.getElementById("bootSound").play();
+/* PRZEJŚCIA SCEN */
 
-const boot = document.getElementById("boot");
+setTimeout(()=>{
+document.getElementById("building").style.opacity="0"
+document.getElementById("deskScene").style.opacity="1"
+},3000)
 
-const bootLines = [
+setTimeout(()=>{
+document.getElementById("deskScene").style.opacity="0"
+document.getElementById("bios").style.opacity="1"
+document.getElementById("bootSound").play()
+startBoot()
+},6500)
+
+/* BIOS */
+
+const boot = document.getElementById("boot")
+
+const bootLines=[
 
 "Phoenix BIOS v4.0 Release 6.0",
 "Copyright 1985-1999 Phoenix Technologies",
 "",
 "Detecting hardware...",
-"CPU: Intel Pentium 200MHz detected",
-"Checking NVRAM...",
+"CPU: Intel Pentium detected",
 "",
 "Memory Test:"
 
-];
+]
 
-let ram = 0;
+let ram=0
 
-function typeLine(text, callback){
+function typeLine(text,callback){
 
-let i=0;
+let i=0
 
 let interval=setInterval(()=>{
 
-boot.textContent += text[i];
+boot.textContent+=text[i]
 
-i++;
+i++
 
 if(i>=text.length){
 
-clearInterval(interval);
+clearInterval(interval)
 
-boot.textContent+="\n";
+boot.textContent+="\n"
 
-setTimeout(callback,200);
-
-}
-
-},20);
+setTimeout(callback,200)
 
 }
 
-function bootSequence(){
+},20)
 
-let i=0;
+}
+
+function startBoot(){
+
+let i=0
 
 function next(){
 
@@ -179,21 +212,20 @@ if(i<bootLines.length){
 
 typeLine(bootLines[i],()=>{
 
-i++;
+i++
+next()
 
-next();
-
-});
+})
 
 }else{
 
-memoryTest();
+memoryTest()
 
 }
 
 }
 
-next();
+next()
 
 }
 
@@ -201,88 +233,76 @@ function memoryTest(){
 
 let interval=setInterval(()=>{
 
-ram+=512;
+ram+=512
 
-boot.textContent = boot.textContent.replace(/Memory Test:.*/,"Memory Test: "+ram+"K");
+boot.textContent=boot.textContent.replace(/Memory Test:.*/,"Memory Test: "+ram+"K")
 
 if(ram>=8192){
 
-clearInterval(interval);
+clearInterval(interval)
 
-boot.textContent+=" OK\n\n";
+boot.textContent+=" OK\n\n"
+boot.textContent+="Booting DomekOS...\n\n"
+boot.textContent+="Type /help\n\n"
 
-boot.textContent+="Booting DomekOS...\n\n";
-
-boot.textContent+="Type /help\n\n";
-
-setTimeout(()=>{
-
-document.getElementById("terminal").style.display="block";
-
-},1000);
+document.getElementById("cmd").style.display="block"
 
 }
 
-},120);
+},120)
 
 }
 
-bootSequence();
+/* TERMINAL */
 
-const commandInput=document.getElementById("command");
-
-const output=document.getElementById("output");
+const commandInput=document.getElementById("command")
+const output=document.getElementById("output")
 
 commandInput.addEventListener("keydown",function(e){
 
 if(e.key==="Enter"){
 
-let cmd=commandInput.value.trim();
-
-let res="";
+let cmd=commandInput.value.trim()
+let res=""
 
 switch(cmd){
 
 case "/help":
-res="Commands:\n/wyksztalcenie\n/umiejetnosci\n/projekty\n/kontakt\n/scan";
-break;
+res="/profil /wyksztalcenie /umiejetnosci /zadania /kontakt"
+break
+
+case "/profil":
+res="Kandydat: Domek\nStanowisko: Młodszy Informatyk\nZainteresowania: administracja systemów"
+break
 
 case "/wyksztalcenie":
-res="Technikum Informatyczne\nProfil: Informatyka";
-break;
+res="Technikum Informatyczne"
+break
 
 case "/umiejetnosci":
-res="Python\nLinux\nHTML\nOBS\nAutomatyzacja";
-break;
+res="Instalacja Windows\nDiagnostyka sprzętu\nLinux\nAutomatyzacja Python"
+break
 
-case "/projekty":
-res="Bot TikTok Live\nMini gry do streamów\nAutomatyzacje OBS";
-break;
+case "/zadania":
+res="Instalacja systemów\nKonfiguracja stacji roboczych\nHelpdesk\nAktualizacje oprogramowania"
+break
 
 case "/kontakt":
-res="email: twoj@email\nGitHub: github.com/twojprofil";
-break;
-
-case "/scan":
-res="Scanning system...\n\nSkill detected:\nPython\nLinux\nAutomation\nStreaming Tools\nCreative Problem Solving";
-break;
-
-case "/hire":
-res="Candidate status: EXCELLENT\nRecommendation: HIRE IMMEDIATELY";
-break;
+res="email: ..."
+break
 
 default:
-res="Unknown command. type /help";
+res="Unknown command"
 
 }
 
-output.innerHTML+="<pre>"+cmd+"\n"+res+"</pre>";
+output.innerHTML+="<pre>"+cmd+"\n"+res+"</pre>"
 
-commandInput.value="";
+commandInput.value=""
 
 }
 
-});
+})
 
 </script>
 
