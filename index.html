@@ -101,18 +101,20 @@ width:300px;
 
 .photo{
 margin-top:10px;
-max-width:180px;
+max-width:90px;
 image-rendering:pixelated;
 }
 
+/* wolniejsza animacja */
+
 .pixelEffect{
-animation: sharpen 0.35s linear;
+animation: sharpen 0.9s linear;
 }
 
 @keyframes sharpen{
 
-0%{filter:blur(10px)}
-50%{filter:blur(3px)}
+0%{filter:blur(12px)}
+50%{filter:blur(5px)}
 100%{filter:blur(0)}
 
 }
@@ -155,10 +157,10 @@ Czy chcesz uruchomić aplikację
 
 <pre id="boot"></pre>
 
+<div id="photoBox"></div>
+
 <span id="prompt"></span>
 <input id="command">
-
-<div id="photoBox"></div>
 
 </div>
 
@@ -312,8 +314,9 @@ function clearConsole(){
 
 boot.textContent=""
 document.getElementById("photoBox").innerHTML=""
+
 boot.textContent+="C:\\CV> /pomoc\n"
-boot.textContent+="/profil /wyksztalcenie /umiejetnosci /zdjęcie\n\n"
+boot.textContent+="/profil /wyksztalcenie /umiejetnosci /zdjecie\n\n"
 
 }
 
@@ -368,7 +371,7 @@ boot.textContent+="C:\\CV> "+cmd+"\n"
 let res=""
 
 if(cmd==="/pomoc"){
-res="/profil /wyksztalcenie /umiejetnosci /zdjęcie"
+res="/profil /wyksztalcenie /umiejetnosci /zdjecie"
 }
 
 else if(cmd==="/profil"){
@@ -383,7 +386,7 @@ else if(cmd==="/umiejetnosci"){
 res="Instalacja systemów\nHelpdesk\nDiagnostyka sprzętu"
 }
 
-else if(cmd==="/zdjęcie"){
+else if(cmd==="/zdjecie"){
 
 photoStage=1
 
