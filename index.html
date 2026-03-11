@@ -76,7 +76,8 @@ object-fit:cover;
 
 #bios{
 display:none;
-max-width:90vw;
+width:90vw;
+max-width:900px;
 }
 
 pre{
@@ -84,23 +85,19 @@ white-space:pre-wrap;
 word-break:break-word;
 }
 
-/* TERMINAL */
+/* TERMINAL INPUT */
 
-#terminal{
-display:none;
-max-width:90vw;
-}
-
-input{
+#command{
 background:black;
 border:none;
 color:#00ff66;
 font-family:monospace;
 font-size:18px;
 outline:none;
+width:300px;
 }
 
-/* ZDJĘCIE */
+/* PHOTO */
 
 .photo{
 margin-top:10px;
@@ -113,8 +110,8 @@ animation: sharpen 0.6s linear;
 
 @keyframes sharpen{
 
-0%{filter:blur(10px)}
-50%{filter:blur(3px)}
+0%{filter:blur(12px)}
+50%{filter:blur(4px)}
 100%{filter:blur(0)}
 
 }
@@ -160,15 +157,10 @@ Czy chcesz uruchomić aplikację
 
 <pre id="boot"></pre>
 
-</div>
-
-
-<div id="terminal">
-
-<span>C:\CV></span>
+<span id="prompt"></span>
 <input id="command">
 
-<div id="output"></div>
+<div id="photoBox"></div>
 
 </div>
 
@@ -190,7 +182,6 @@ document.getElementById("xpWindow").style.display="block"
 function startApp(){
 
 document.getElementById("xpWindow").style.display="none"
-
 startVideo()
 
 }
@@ -209,7 +200,6 @@ video.play()
 video.onended=function(){
 
 document.getElementById("videoContainer").style.display="none"
-
 startBoot()
 
 }
@@ -253,9 +243,7 @@ index++
 if(index>=text.length){
 
 clearInterval(interval)
-
 boot.textContent+="\n"
-
 setTimeout(callback,200)
 
 }
@@ -292,7 +280,7 @@ next()
 }
 
 
-/* LOADING W TEJ SAMEJ LINII */
+/* LOADING */
 
 function startLoading(){
 
@@ -306,7 +294,9 @@ percent+=Math.floor(Math.random()*8)+2
 
 if(percent>100) percent=100
 
-boot.textContent = boot.textContent.replace(/Uruchamianie CV kandydata... \d+%/,"Uruchamianie CV kandydata... "+percent+"%")
+boot.textContent =
+boot.textContent.replace(/Uruchamianie CV kandydata... \d+%/,
+"Uruchamianie CV kandydata... "+percent+"%")
 
 if(percent==100){
 
@@ -327,10 +317,10 @@ startTerminal()
 
 function startTerminal(){
 
-document.getElementById("terminal").style.display="block"
-
 const command=document.getElementById("command")
-const output=document.getElementById("output")
+const prompt=document.getElementById("prompt")
+
+prompt.textContent="C:\\CV> "
 
 command.focus()
 
@@ -342,48 +332,33 @@ if(e.key==="Enter"){
 
 let cmd=command.value.trim().toLowerCase()
 
+boot.textContent+="C:\\CV> "+cmd+"\n"
+
 let res=""
 
 if(cmd==="/pomoc"){
-
 res="/profil /wyksztalcenie /umiejetnosci /zdjęcie"
-
 }
 
 else if(cmd==="/profil"){
-
 res="Jan Kowalski\nKandydat na młodszego informatyka"
-
 }
 
 else if(cmd==="/wyksztalcenie"){
-
 res="Technikum informatyczne"
-
 }
 
 else if(cmd==="/umiejetnosci"){
-
 res="Instalacja systemów\nHelpdesk\nDiagnostyka sprzętu"
-
 }
 
 else if(cmd==="/zdjęcie"){
 
 photoStage=1
 
-output.innerHTML+=`
+document.getElementById("photoBox").innerHTML=
 
-<div>
-
-<img id="photo" class="photo" src="obraz.png" width="120">
-
-<p>Jakość: 140p</p>
-<p>Czy poprawić jakość zdjęcia? (tak/nie)</p>
-
-</div>
-
-`
+'<img id="photo" class="photo" src="obraz.png" width="140"><br>Jakość: 140p<br>Czy poprawić jakość zdjęcia? (tak/nie)'
 
 command.value=""
 return
@@ -392,31 +367,27 @@ return
 
 else if(cmd==="tak" && photoStage>0){
 
-photoStage++
-
 let photo=document.getElementById("photo")
 
 photo.classList.add("pixelEffect")
 
 setTimeout(()=>{
-
 photo.classList.remove("pixelEffect")
-
 },600)
+
+photoStage++
 
 if(photoStage==2){
 
-photo.width=220
-
-output.innerHTML+="<p>Jakość: 360p</p><p>Czy poprawić jakość zdjęcia? (tak/nie)</p>"
+document.getElementById("photoBox").innerHTML+=
+"<br>Jakość: 360p<br>Czy poprawić jakość zdjęcia? (tak/nie)"
 
 }
 
 else if(photoStage==3){
 
-photo.width=340
-
-output.innerHTML+="<p>Jakość: HD</p><p>Czy poprawić jakość zdjęcia? (tak/nie)</p>"
+document.getElementById("photoBox").innerHTML+=
+"<br>Jakość: HD<br>Czy poprawić jakość zdjęcia? (tak/nie)"
 
 }
 
@@ -424,7 +395,8 @@ else{
 
 photo.src="obraz2.png"
 
-output.innerHTML+="<p>BŁĄD: przekroczono maksymalną jakość zdjęcia.</p>"
+document.getElementById("photoBox").innerHTML+=
+"<br>BŁĄD: przekroczono maksymalną jakość zdjęcia."
 
 photoStage=0
 
@@ -436,20 +408,15 @@ return
 }
 
 else if(cmd==="nie"){
-
 res="Anulowano poprawę jakości."
-
 photoStage=0
-
 }
 
 else{
-
 res="Nieznana komenda"
-
 }
 
-output.innerHTML+="<pre>"+cmd+"\n"+res+"</pre>"
+boot.textContent+=res+"\n"
 
 command.value=""
 
