@@ -16,31 +16,9 @@ font-family:monospace;
 overflow:hidden;
 }
 
-/* INTRO VIDEO */
-
-#intro{
-position:fixed;
-top:0;
-left:0;
-width:100%;
-height:100%;
-background:black;
-display:flex;
-justify-content:center;
-align-items:center;
-z-index:999;
-}
-
-#intro video{
-width:100%;
-height:100%;
-object-fit:cover;
-}
-
 /* BIOS */
 
 #bios{
-opacity:0;
 display:flex;
 justify-content:center;
 align-items:center;
@@ -56,23 +34,28 @@ font-size:20px;
 line-height:1.4;
 }
 
-/* CRT scanlines */
+/* VIDEO */
 
-pre::after{
-content:"";
-position:absolute;
+#videoContainer{
+position:fixed;
 top:0;
 left:0;
 width:100%;
 height:100%;
-background:repeating-linear-gradient(
-to bottom,
-rgba(0,0,0,0) 0px,
-rgba(0,0,0,0) 2px,
-rgba(0,0,0,0.35) 3px
-);
-pointer-events:none;
+background:black;
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
 }
+
+#videoContainer video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
+/* TERMINAL */
 
 input{
 background:black;
@@ -89,11 +72,24 @@ outline:none;
 
 <body>
 
-<!-- INTRO VIDEO -->
+<!-- BIOS -->
 
-<div id="intro">
+<div id="bios">
 
-<video id="introVideo" autoplay muted playsinline>
+<div id="terminal">
+
+<pre id="boot"></pre>
+
+</div>
+
+</div>
+
+
+<!-- VIDEO -->
+
+<div id="videoContainer">
+
+<video id="introVideo" playsinline>
 
 <source src="intro.mp4" type="video/mp4">
 
@@ -102,44 +98,7 @@ outline:none;
 </div>
 
 
-<!-- BIOS SCREEN -->
-
-<div id="bios">
-
-<div id="terminal">
-
-<pre id="boot"></pre>
-
-<div id="cmd" style="display:none">
-
-<span>C:\CV></span>
-<input id="command">
-
-<div id="output"></div>
-
-</div>
-
-</div>
-
-</div>
-
-
 <script>
-
-/* VIDEO -> BIOS */
-
-const video = document.getElementById("introVideo")
-
-video.onended = function(){
-
-document.getElementById("intro").style.display = "none"
-
-document.getElementById("bios").style.opacity = "1"
-
-setTimeout(startBoot,700)
-
-}
-
 
 /* BIOS BOOT */
 
@@ -183,7 +142,6 @@ setTimeout(callback,200)
 
 }
 
-
 function startBoot(){
 
 let i=0
@@ -211,7 +169,6 @@ next()
 
 }
 
-
 function memoryTest(){
 
 let interval=setInterval(()=>{
@@ -225,10 +182,10 @@ if(ram>=8192){
 clearInterval(interval)
 
 boot.textContent+=" OK\n\n"
-boot.textContent+="Booting DomekOS...\n\n"
-boot.textContent+="Type /help to list commands\n\n"
+boot.textContent+="Candidate system ready.\n"
+boot.textContent+="Press any key to boot Candidate CV\n"
 
-document.getElementById("cmd").style.display="block"
+waitForKey()
 
 }
 
@@ -236,8 +193,64 @@ document.getElementById("cmd").style.display="block"
 
 }
 
+/* WAIT FOR KEY */
+
+function waitForKey(){
+
+document.addEventListener("keydown",startVideo)
+
+}
+
+/* START VIDEO */
+
+function startVideo(){
+
+document.removeEventListener("keydown",startVideo)
+
+document.getElementById("bios").style.display="none"
+
+let videoContainer = document.getElementById("videoContainer")
+let video = document.getElementById("introVideo")
+
+videoContainer.style.display="flex"
+
+video.play()
+
+video.onended=function(){
+
+videoContainer.style.display="none"
+
+startTerminal()
+
+}
+
+}
+
 
 /* TERMINAL */
+
+function startTerminal(){
+
+document.body.innerHTML=`
+
+<div style="padding:40px">
+
+<pre>
+
+DomekOS Candidate Terminal
+
+Type /help
+
+</pre>
+
+<span>C:\\CV></span>
+<input id="command">
+
+<div id="output"></div>
+
+</div>
+
+`
 
 const commandInput=document.getElementById("command")
 const output=document.getElementById("output")
@@ -269,7 +282,7 @@ res="Instalacja Windows\nDiagnostyka sprzętu\nLinux\nAutomatyzacja Python"
 break
 
 case "/zadania":
-res="Instalacja systemów operacyjnych\nKonfiguracja stacji roboczych\nHelpdesk\nAktualizacje oprogramowania"
+res="Instalacja systemów operacyjnych\nKonfiguracja stacji roboczych\nHelpdesk"
 break
 
 case "/kontakt":
@@ -288,6 +301,13 @@ commandInput.value=""
 }
 
 })
+
+}
+
+
+/* START BIOS */
+
+startBoot()
 
 </script>
 
