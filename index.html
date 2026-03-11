@@ -51,12 +51,37 @@ padding:6px 20px;
 font-family:Tahoma;
 }
 
+/* VIDEO */
+
+#videoContainer{
+position:fixed;
+top:0;
+left:0;
+width:100%;
+height:100%;
+background:black;
+display:none;
+justify-content:center;
+align-items:center;
+z-index:1000;
+}
+
+#videoContainer video{
+width:100%;
+height:100%;
+object-fit:cover;
+}
+
 /* BIOS */
 
 #bios{
 display:none;
 max-width:90vw;
+}
+
+pre{
 white-space:pre-wrap;
+word-break:break-word;
 }
 
 /* TERMINAL */
@@ -75,10 +100,23 @@ font-size:18px;
 outline:none;
 }
 
-img{
-max-width:300px;
-display:block;
+/* ZDJĘCIE */
+
+.photo{
 margin-top:10px;
+image-rendering:pixelated;
+}
+
+.pixelEffect{
+animation: sharpen 0.6s linear;
+}
+
+@keyframes sharpen{
+
+0%{filter:blur(10px)}
+50%{filter:blur(3px)}
+100%{filter:blur(0)}
+
 }
 
 </style>
@@ -86,6 +124,7 @@ margin-top:10px;
 </head>
 
 <body>
+
 
 <div id="xpWindow">
 
@@ -100,16 +139,27 @@ Czy chcesz uruchomić aplikację
 
 <br><br>
 
-<button onclick="start()">Tak</button>
-<button onclick="no()">Nie</button>
+<button onclick="startApp()">Tak</button>
+<button onclick="noApp()">Nie</button>
 
 </div>
+
+</div>
+
+
+<div id="videoContainer">
+
+<video id="introVideo" playsinline>
+<source src="intro.mp4" type="video/mp4">
+</video>
 
 </div>
 
 
 <div id="bios">
+
 <pre id="boot"></pre>
+
 </div>
 
 
@@ -125,9 +175,9 @@ Czy chcesz uruchomić aplikację
 
 <script>
 
-/* XP WINDOW */
+/* XP */
 
-function no(){
+function noApp(){
 
 document.getElementById("xpWindow").style.display="none"
 
@@ -137,23 +187,46 @@ document.getElementById("xpWindow").style.display="block"
 
 }
 
-function start(){
+function startApp(){
 
 document.getElementById("xpWindow").style.display="none"
+
+startVideo()
+
+}
+
+
+/* VIDEO */
+
+function startVideo(){
+
+const video=document.getElementById("introVideo")
+
+document.getElementById("videoContainer").style.display="flex"
+
+video.play()
+
+video.onended=function(){
+
+document.getElementById("videoContainer").style.display="none"
+
 startBoot()
 
 }
+
+}
+
 
 /* BIOS */
 
 const boot=document.getElementById("boot")
 
-const lines=[
+const bootLines=[
 
 "Urząd statystyczny w Katowicach 2.0",
-"Copyright 1912-1945 Miasto Katowice",
+"Copyright 1912 - 1945 Miasto Katowice",
 "",
-"Niezidentyfikowany system...",
+"Niezidentyfikowany",
 "Wykrywanie nowego zgłoszenia...",
 "CV: Jan Kowalski wykryto",
 "",
@@ -167,23 +240,48 @@ const lines=[
 
 let i=0
 
+function typeLine(text,callback){
+
+let index=0
+
+let interval=setInterval(()=>{
+
+boot.textContent+=text[index]
+
+index++
+
+if(index>=text.length){
+
+clearInterval(interval)
+
+boot.textContent+="\n"
+
+setTimeout(callback,200)
+
+}
+
+},20)
+
+}
+
 function startBoot(){
 
 document.getElementById("bios").style.display="block"
 
 function next(){
 
-if(i<lines.length){
+if(i<bootLines.length){
 
-boot.innerHTML+=lines[i]+"\n"
+typeLine(bootLines[i],()=>{
 
 i++
+next()
 
-setTimeout(next,400)
+})
 
 }else{
 
-loadCV()
+startLoading()
 
 }
 
@@ -193,29 +291,37 @@ next()
 
 }
 
-function loadCV(){
+
+/* LOADING W TEJ SAMEJ LINII */
+
+function startLoading(){
 
 let percent=0
 
+boot.textContent+="\nUruchamianie CV kandydata... 0%"
+
 let interval=setInterval(()=>{
 
-boot.innerHTML="Uruchamianie CV kandydata... "+percent+"%"
+percent+=Math.floor(Math.random()*8)+2
 
-percent++
+if(percent>100) percent=100
 
-if(percent>100){
+boot.textContent = boot.textContent.replace(/Uruchamianie CV kandydata... \d+%/,"Uruchamianie CV kandydata... "+percent+"%")
+
+if(percent==100){
 
 clearInterval(interval)
 
-boot.innerHTML+="\n\nNapisz /pomoc aby wyświetlić dostępne komendy\n\n"
+boot.textContent+="\n\nNapisz /pomoc aby wyświetlić dostępne komendy\n\n"
 
 startTerminal()
 
 }
 
-},30)
+},120)
 
 }
+
 
 /* TERMINAL */
 
@@ -234,24 +340,32 @@ command.addEventListener("keydown",function(e){
 
 if(e.key==="Enter"){
 
-let cmd=command.value.trim()
+let cmd=command.value.trim().toLowerCase()
 
 let res=""
 
 if(cmd==="/pomoc"){
+
 res="/profil /wyksztalcenie /umiejetnosci /zdjęcie"
+
 }
 
 else if(cmd==="/profil"){
+
 res="Jan Kowalski\nKandydat na młodszego informatyka"
+
 }
 
 else if(cmd==="/wyksztalcenie"){
+
 res="Technikum informatyczne"
+
 }
 
 else if(cmd==="/umiejetnosci"){
+
 res="Instalacja systemów\nHelpdesk\nDiagnostyka sprzętu"
+
 }
 
 else if(cmd==="/zdjęcie"){
@@ -259,42 +373,58 @@ else if(cmd==="/zdjęcie"){
 photoStage=1
 
 output.innerHTML+=`
+
 <div>
-<img src="obraz.png" style="image-rendering:pixelated;width:120px">
-<p>Czy poprawić jakość zdjęcia? Tak/Nie</p>
+
+<img id="photo" class="photo" src="obraz.png" width="120">
+
+<p>Jakość: 140p</p>
+<p>Czy poprawić jakość zdjęcia? (tak/nie)</p>
+
 </div>
+
 `
 
 command.value=""
 return
+
 }
 
-else if(cmd.toLowerCase()==="tak" && photoStage>0){
+else if(cmd==="tak" && photoStage>0){
 
 photoStage++
 
+let photo=document.getElementById("photo")
+
+photo.classList.add("pixelEffect")
+
+setTimeout(()=>{
+
+photo.classList.remove("pixelEffect")
+
+},600)
+
 if(photoStage==2){
 
-output.innerHTML+=`
-<img src="obraz.png" style="width:200px">
-<p>Czy poprawić jakość zdjęcia? Tak/Nie</p>
-`
+photo.width=220
+
+output.innerHTML+="<p>Jakość: 360p</p><p>Czy poprawić jakość zdjęcia? (tak/nie)</p>"
+
 }
 
 else if(photoStage==3){
 
-output.innerHTML+=`
-<img src="obraz.png" style="width:300px">
-<p>Czy poprawić jakość zdjęcia? Tak/Nie</p>
-`
+photo.width=340
+
+output.innerHTML+="<p>Jakość: HD</p><p>Czy poprawić jakość zdjęcia? (tak/nie)</p>"
+
 }
 
 else{
 
-output.innerHTML+=`
-<img src="obraz2.png">
-<p>BŁĄD: przekroczono maksymalną jakość zdjęcia.</p>
-`
+photo.src="obraz2.png"
+
+output.innerHTML+="<p>BŁĄD: przekroczono maksymalną jakość zdjęcia.</p>"
 
 photoStage=0
 
@@ -302,15 +432,21 @@ photoStage=0
 
 command.value=""
 return
+
 }
 
-else if(cmd.toLowerCase()==="nie"){
+else if(cmd==="nie"){
+
 res="Anulowano poprawę jakości."
+
 photoStage=0
+
 }
 
 else{
+
 res="Nieznana komenda"
+
 }
 
 output.innerHTML+="<pre>"+cmd+"\n"+res+"</pre>"
