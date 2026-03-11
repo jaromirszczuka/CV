@@ -4,12 +4,16 @@
 <head>
 
 <meta charset="UTF-8">
+
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+
 <title>DomekOS CV</title>
 
 <style>
 
-body{
+html, body{
 margin:0;
+padding:0;
 background:black;
 color:#00ff66;
 font-family:monospace;
@@ -18,6 +22,7 @@ display:flex;
 justify-content:center;
 align-items:center;
 height:100vh;
+touch-action:manipulation;
 }
 
 #screen{
@@ -28,6 +33,7 @@ width:800px;
 #hiddenInput{
 opacity:0;
 position:absolute;
+font-size:16px;
 }
 
 #videoContainer{
@@ -52,6 +58,16 @@ object-fit:cover;
 #bios{
 display:none;
 width:900px;
+max-width:90%;
+}
+
+input{
+background:black;
+border:none;
+color:#00ff66;
+font-family:monospace;
+font-size:18px;
+outline:none;
 }
 
 </style>
@@ -71,7 +87,7 @@ Press any key then ENTER to boot Candidate CV
 
 </div>
 
-<input id="hiddenInput">
+<input id="hiddenInput" autocomplete="off">
 
 <div id="videoContainer">
 
@@ -93,7 +109,7 @@ const input = document.getElementById("hiddenInput")
 const video = document.getElementById("introVideo")
 const videoContainer = document.getElementById("videoContainer")
 
-/* OTWARCIE KLAWIATURY */
+/* OTWÓRZ KLAWIATURĘ PO 1s */
 
 setTimeout(()=>{
 input.focus()
@@ -103,11 +119,13 @@ input.focus()
 
 input.addEventListener("keydown",function(e){
 
-if(e.key === "Enter"){
+if(e.key==="Enter"){
 startVideo()
 }
 
 })
+
+/* START FILMU */
 
 function startVideo(){
 
@@ -119,7 +137,7 @@ videoContainer.style.display="flex"
 
 video.play()
 
-video.onended = function(){
+video.onended=function(){
 
 videoContainer.style.display="none"
 
@@ -130,7 +148,7 @@ startBoot()
 }
 
 
-/* BIOS */
+/* BIOS BOOT */
 
 const boot=document.getElementById("boot")
 
@@ -215,7 +233,7 @@ clearInterval(interval)
 
 boot.textContent+=" OK\n\n"
 boot.textContent+="Booting DomekOS...\n\n"
-boot.textContent+="Type /help\n\n"
+boot.textContent+="Type /help to list commands\n\n"
 
 startTerminal()
 
@@ -273,7 +291,7 @@ res="Instalacja Windows\nDiagnostyka sprzętu\nLinux\nAutomatyzacja Python"
 break
 
 case "/zadania":
-res="Instalacja systemów\nHelpdesk\nKonfiguracja stacji roboczych"
+res="Instalacja systemów operacyjnych\nHelpdesk\nKonfiguracja stacji roboczych"
 break
 
 case "/kontakt":
