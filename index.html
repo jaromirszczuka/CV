@@ -111,7 +111,7 @@ font-size:16px;
 @media screen and (min-width:768px){
 
 #bios{
-font-size:21px;
+font-size:20px;
 }
 
 }
@@ -247,7 +247,7 @@ const boot=document.getElementById("boot")
 const bootLines=[
 
 "Urząd statystyczny w Katowicach 2.0",
-"Copyright 1912 - 1945 Miasto Katowice",
+"Copyright 1912 - 2026 Miasto Katowice",
 
 "\nWykrywanie nowego zgłoszenia...",
 "CV: Jaromir Szczuka - wykryto",
@@ -352,7 +352,7 @@ boot.textContent=""
 document.getElementById("photoBox").innerHTML=""
 
 boot.textContent+="C:\\CV> /pomoc\n"
-boot.textContent+="/profil /wyksztalcenie /umiejetnosci /zdjecie\n\n"
+boot.textContent+="/zainteresowania /wyksztalcenie /umiejetnosci /certyfikaty /zdjecie\n\n"
 
 }
 
@@ -407,18 +407,32 @@ boot.textContent+="C:\\CV> "+cmd+"\n"
 let res=""
 
 if(cmd==="/pomoc"){
-res="/profil /wyksztalcenie /umiejetnosci /zdjecie"
+res="/zainteresowania /wyksztalcenie /umiejetnosci /certyfikaty /zdjecie"
 }
 
-else if(cmd==="/profil"){
+else if(cmd==="/zainteresowania"){
 res="Jan Kowalski\nKandydat na młodszego informatyka"
 }
 
 else if(cmd==="/wyksztalcenie"){
-res="Technikum informatyczne"
+res="VI LICEUM OGÓLNOKSZTAŁCĄCE IM.
+JANUSZA KORCZAKA (2016-2019)\nWYŻSZA SZKOŁA TECHNOLOGI
+INFORMATYCZNYCH W KATOWICACH:
+      INFORMATYKA (2019 - 2020)\nUNIWERSYTET ŚLĄSKI - WYDZIAŁ NAUK
+SPOŁECZNYCH : POLITOLOGIA
+      (2020 - 2024) \nUNIWERSYTET ŚLĄSKI - WYDZIAŁ NAUK
+HUMANISTYCZNYCH : KULTUROZNASTWO
+      (2024 - 2026) \n"
 }
 
 else if(cmd==="/umiejetnosci"){
+res="Obsługa komputera plus
+znajomość programów typu
+office, excel\nWysoka kultura osobista\nCierpliwość i pozytywne
+nastawienie"
+}
+  
+else if(cmd==="/certyfikaty"){
 res="Instalacja systemów\nHelpdesk\nDiagnostyka sprzętu"
 }
 
